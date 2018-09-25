@@ -1193,8 +1193,8 @@ bool CtestCameraLibDlg::stereobuild_with_Ref(ScanImages& scanImagesLeft, ScanIma
 	return true;
 }
 
-
-/*void CtestCameraLibDlg::OnBnClickedButtonGrab()
+/*
+void CtestCameraLibDlg::OnBnClickedButtonGrab()
 {
 	// TODO:  在此添加控件通知处理程序代码
 	
@@ -1211,20 +1211,20 @@ bool CtestCameraLibDlg::stereobuild_with_Ref(ScanImages& scanImagesLeft, ScanIma
 		char lPath[200] = { 0 };
 		char rPath[200] = { 0 };
 		char lhPath[200] = { 0 };
-		sprintf_s(lPath, 200, "F:\\Sn3D_Hardware\\testCameraLib-ForDLPSnap\\x64\\Release\\saveImages\\456\\Sc_0_%d.bmp", i);
-		sprintf_s(rPath, 200, "F:\\Sn3D_Hardware\\testCameraLib-ForDLPSnap\\x64\\Release\\saveImages\\456\\Sc_1_%d.bmp", i);
-		sprintf_s(lhPath, 200, "F:\\Sn3D_Hardware\\testCameraLib-ForDLPSnap\\x64\\Release\\saveImages\\456\\Sc_2_%d.bmp", i);
+		sprintf_s(lPath, 200, "H:\\GrapImage\\testCameraLib-ForDLPSnap\\x64\\Release\\saveImages\\ScanImages\\2GS\\Sc_0_%d.bmp", i);
+		sprintf_s(rPath, 200, "H:\\GrapImage\\testCameraLib-ForDLPSnap\\x64\\Release\\saveImages\\ScanImages\\2GS\\Sc_1_%d.bmp", i);
+		sprintf_s(lhPath, 200, "H:\\GrapImage\\testCameraLib-ForDLPSnap\\x64\\Release\\saveImages\\ScanImages\\2GS\\Sc_2_%d.bmp", i);
 		int ret = sn3DImageLoad::sn3DReadImage(lPath, scanLImages.images[i]);
 		ret = sn3DImageLoad::sn3DReadImage(rPath, scanRImages.images[i]);
 		ret = sn3DImageLoad::sn3DReadImage(lhPath, scanLHImages.images[i]);
 	}
 	// 计算
 	char tmpChildFolderPath[300] = { 0 };
-	sprintf_s(tmpChildFolderPath, "F:\\Sn3D_Hardware\\testCameraLib-ForDLPSnap\\x64\\Release\\saveImages\\5425");
+	sprintf_s(tmpChildFolderPath, "H:\\GrapImage\\testCameraLib-ForDLPSnap\\x64\\Release\\saveImages\\ScanImages\\kk");
 	char tmpCalibInfoPath[300] = { 0 };
-	sprintf_s(tmpCalibInfoPath, "F:\\Sn3D_Hardware\\testCameraLib-ForDLPSnap\\x64\\Release\\200x150");
+	sprintf_s(tmpCalibInfoPath, "H:\\GrapImage\\testCameraLib-ForDLPSnap\\x64\\Release\\200x150");
 	char tmpDestFileName[300] = { 0 };
-	sprintf_s(tmpDestFileName, "F:\\Sn3D_Hardware\\testCameraLib-ForDLPSnap\\x64\\Release\\saveImages\\5425\\5425.dml");
+	sprintf_s(tmpDestFileName, "H:\\GrapImage\\testCameraLib-ForDLPSnap\\x64\\Release\\saveImages\\ScanImages\\kk\\kk.dml");
 
 
 	printf("Stripe Rebuild\n");
@@ -1265,8 +1265,8 @@ bool CtestCameraLibDlg::stereobuild_with_Ref(ScanImages& scanImagesLeft, ScanIma
 	else
 		MessageBox(_T("失败"));
 	return;
-}*/
-
+}
+*/
 
 void CtestCameraLibDlg::OnBnClickedButtonGrab()
 {

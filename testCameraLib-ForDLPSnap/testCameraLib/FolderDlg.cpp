@@ -49,8 +49,10 @@ END_MESSAGE_MAP()
 BOOL CFolderDlg::PreTranslateMessage(MSG* pMsg)
 {
 	if (pMsg->message >= WM_KEYFIRST && pMsg->message <= WM_KEYLAST){
-		if (VK_RETURN == pMsg->lParam)
+		if (VK_RETURN == pMsg->wParam){
+			CFolderDlg::OnBnClickedButtonOk();
 			return TRUE;
+		}
 	}
 	return CDialogEx::PreTranslateMessage(pMsg);
 }
