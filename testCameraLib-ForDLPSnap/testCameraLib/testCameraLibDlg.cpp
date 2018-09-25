@@ -430,6 +430,7 @@ BOOL CtestCameraLibDlg::PreTranslateMessage(MSG *pMsg)
 					m_defaultExposure = tmpExposure*1000;
 					SetDlgItemText(IDC_EDIT_EXP, tmpCtrlStr);
 					WriteParam();
+					MessageBox(_T("设置曝光时间成功"));
 					return TRUE;
 				}
 				else
@@ -456,6 +457,7 @@ BOOL CtestCameraLibDlg::PreTranslateMessage(MSG *pMsg)
 					}
 					m_defaultGain = (int)tmpGain;
 					WriteParam();
+					MessageBox(_T("设置增益成功"));
 					return TRUE;
 				}
 				else
@@ -472,8 +474,13 @@ BOOL CtestCameraLibDlg::PreTranslateMessage(MSG *pMsg)
 				long tmpGain = _tcstol(tmpCtrlStr.GetBuffer(), &tmpPtr, 10);
 				if (NULL != tmpPtr)
 				{
+					if (m_startGain == tmpGain)
+					{
+						return TRUE;
+					}
 					m_startGain = tmpGain;
 					WriteParam();
+					MessageBox(_T("设置增益起点成功"));
 					return TRUE;
 				}
 				else
@@ -489,8 +496,13 @@ BOOL CtestCameraLibDlg::PreTranslateMessage(MSG *pMsg)
 				long tmpPeriod = _tcstol(tmpCtrlStr.GetBuffer(), &tmpPtr, 10);
 				if (NULL != tmpPtr && tmpPeriod >= 0)
 				{
+					if (m_waitTime == tmpPeriod)
+					{
+						return TRUE;
+					}
 					m_waitTime = tmpPeriod;
 					WriteParam();
+					MessageBox(_T("设置间隔时间成功"));
 					return TRUE;
 				}
 				else
@@ -507,8 +519,13 @@ BOOL CtestCameraLibDlg::PreTranslateMessage(MSG *pMsg)
 				double tmpSmooth = _tcstod(tmpCtrlStr.GetBuffer(), &tmpPtr);
 				if (NULL != tmpPtr && tmpSmooth >= 0)
 				{
+					if (m_smoothRatio == tmpSmooth)
+					{
+						return TRUE;
+					}
 					m_smoothRatio = tmpSmooth;
 					WriteParam();
+					MessageBox(_T("设置平滑系数成功"));
 					return TRUE;
 				}
 				else
@@ -1282,164 +1299,11 @@ void CtestCameraLibDlg::OnBnClickedButtonGrab()
 		MessageBox(_T("投影连接错误"));
 		return;
 	}
-	m_childDlg.SetFolderNamePtr(&m_targetSaveFolder);
-	m_childDlg.DoModal();
-	std::string mFolderName = MultiStringFromUnicodeString(m_targetSaveFolder);
-	CString tmpwFolderPath = m_programPath + _T("saveImages\\") + m_targetSaveFolder;
-	tmpwFolderPath += _T("\\");
-	if (FALSE == PathFileExists(tmpwFolderPath))
-		CreateDirectory(tmpwFolderPath, NULL);
-	//m_bHold = true;
+
 	// 循环采图
-	std::string tmpFolderPath = MultiStringFromUnicodeString(m_programPath);
-	int tmpWidth = 0;
-	int tmpHeight = 0;
-	SN_IMG_FORMAT tmpFormat;
-	int tmpImgCount = m_imgGroups[m_imgGroupIndex]->imgNames.size();
-	int tmpStartIndex = m_imgGroups[m_imgGroupIndex]->startIndex;
-	int tmpCamCount = m_cameraList.size();
-	ScanImages scanLImages;
-	ScanImages scanRImages;
-	ScanImages scanLHImages;
-	scanLImages.imageCount = 0;
-	scanRImages.imageCount = 0;
-	scanLHImages.imageCount = 0;
-	int indexOffset = 0;
-	for (int i = 0; i < tmpImgCount; ++i)
-	{
-		m_hProjector->PorjectorDisplay(tmpStartIndex+i);
-		Sleep(m_waitTime);
-		for (int j = 0; j < tmpCamCount; ++j)
-		{
-			if (56 == tmpImgCount && i >= 28)
-				indexOffset = 2;
-			unsigned char* tmpPtr = NULL;
-			EnterCriticalSection(&m_snapLock);
-			sn3DCamera::SnapShot(m_cameraList[j], tmpPtr);
-			LeaveCriticalSection(&m_snapLock);
-			if (tmpPtr)
-			{
-				sn3DImageData<unsigned char>* tmpImg = NULL;
-				if (0 == j){
-					if (0 == indexOffset){
-						tmpImg = &(scanLImages.images[i]);
-						++scanLImages.imageCount;
-					}
-					else{
-						tmpImg = &(scanLHImages.images[i-28]);
-						++scanLHImages.imageCount;
-					}
-				}
-				else{
-					++scanRImages.imageCount;
-					tmpImg = &(scanRImages.images[i]);
-				}
-
-				if (NULL == tmpImg)
-					continue;
-
-				sn3DCamera::GetResolution(m_cameraList[j], tmpWidth, tmpHeight);
-				sn3DCamera::GetColorMode(m_cameraList[j], tmpFormat);
-				tmpImg->create(tmpWidth, tmpHeight, SN_IMG_FORMAT::FORMAT_RGB888 == tmpFormat ? 3 : 1);
-
-				memcpy(tmpImg->m_data, tmpPtr, tmpWidth*tmpHeight*(SN_IMG_FORMAT::FORMAT_RGB888 == tmpFormat ? 3 : 1));
-				sprintf_s(tmpImg->m_name, 259, "%ssaveImages\\%s\\Sc_%d_%d.bmp", tmpFolderPath.c_str(), mFolderName.c_str(), j + indexOffset, (56 == tmpImgCount && i >= 28) ? i - 28 : i);
-				int tmpRet = sn3DImageLoad::sn3DWriteImage(tmpImg->m_name, *tmpImg);
-			}
-		}
-	}
-	bool bSucessFinish = true;
-	// 计算
-	printf("Grab End\n");
-	if (m_bEnableCheckAfterGrab){
-		char tmpChildFolderPath[300] = { 0 };
-		sprintf_s(tmpChildFolderPath, "%ssaveImages\\%s\\", tmpFolderPath.c_str(), mFolderName.c_str());
-		char tmpCalibInfoPath[300] = { 0 };
-		sprintf_s(tmpCalibInfoPath, "%s200x150", tmpFolderPath.c_str());
-		char tmpDestFileName[300] = { 0 };
-		sprintf_s(tmpDestFileName, "%s%s.dml", tmpChildFolderPath, mFolderName.c_str());
-		if (85 == m_imgGroups[m_imgGroupIndex]->imgNames.size()){ // 标定板重建
-			printf("Calib-board Rebuild\n");
-			// 计算 2D (固定值)
-			std::vector<float> widthSamples;
-			for (int i = 0; i < 17; ++i)
-				widthSamples.push_back(1600 - i * 80);
-			std::vector<float> heightSamples;
-			for (int i = 0; i < 14; ++i) 
-				heightSamples.push_back(1060 - i * 80);
-			std::vector<Vector2> offsets;
-			offsets.emplace_back(0, 0);
-			vector<float> tw = { -320.f, -306.667f, -293.333f, -280.f, -266.667f, -253.333f, 253.333f, 266.667f, 280.f, 293.333f, 306.667f, 320.f };
-			vector<float> th = { 40.f, 26.667f, 13.333f, 0.f, -13.333f, -26.667f, -40.f };
-			for (int i = 0; i < th.size(); ++i)
-			{
-				for (int j = 0; j < tw.size(); ++j)
-					offsets.emplace_back(tw[j], th[i]);
-			}
-			vector<Vector3> p3Ds;
-			bool bRet = stereobuild_with_Ref(scanLImages, scanRImages, tmpCalibInfoPath, p3Ds);
-			if (bRet){
-				DLPMapLookupTable table;
-				Sn3DAlgorithm::RetVal val = DLP_compute_map_use_calibration_board(widthSamples, heightSamples, offsets, p3Ds, Vector2i(1920, 1080), m_bUsedInBigPlane ? Vector2(144, 81) : Vector2(96, 54), table, m_smoothRatio);
-				cout << val << endl;
-				cout << table.gridNum.transpose() << endl;
-				cout << table.gridSize.transpose() << endl;
-				cout << table.table[0].cols() << " " << table.table[0].rows() << endl;
-				cout << table.table[1].cols() << " " << table.table[1].rows() << endl;
-				if (0 != val){
-					printf("DLP_compute_map_use_calibration_board ReturnError: %d\n", val);
-					bSucessFinish = false;
-				}
-				else
-					write_DLPMapLookupTable(tmpDestFileName, table);
-			}
-			else
-				printf("Rebuild Failed\n");
-		}
-		else{ // 条纹重建
-
-			printf("Stripe Rebuild\n");
-			std::vector<Vector3> p3D;
-			std::vector<Vector2> p2D;
-			bool bRet = StereobuildDLP(scanLImages, scanRImages, scanLHImages, tmpCalibInfoPath, p3D, p2D);
-			if (bRet){
-				DLPMapLookupTable table;
-				Sn3DAlgorithm::RetVal val = DLP_compute_map_relation(p3D, p2D, Vector2i(1920, 1080), m_bUsedInBigPlane ? Vector2(144, 81) : Vector2(96, 54), table, m_smoothRatio);
-				if (0 != val){
-					bSucessFinish = false;
-				}
-				else
-					write_DLPMapLookupTable(tmpDestFileName, table);
-			}
-			else
-				printf("Rebuild Failed\n");
-		}
-	}
-
-	for (int i = 0; i < scanLImages.imageCount; ++i){
-		if (scanLImages.images[i].m_data){
-			delete[](scanLImages.images[i].m_data);
-			scanLImages.images[i].m_data = NULL;
-		}
-	}
-	for (int i = 0; i < scanRImages.imageCount; ++i){
-		if (scanRImages.images[i].m_data){
-			delete[](scanRImages.images[i].m_data);
-			scanRImages.images[i].m_data = NULL;
-		}
-	}
-	for (int i = 0; i < scanLHImages.imageCount; ++i){
-		if (scanLHImages.images[i].m_data){
-			delete[](scanLHImages.images[i].m_data);
-			scanLHImages.images[i].m_data = NULL;
-		}
-	}
-	m_bHold = false;
-	if (bSucessFinish)
-		MessageBox(_T("完成采集图片"));
-	else
-		MessageBox(_T("执行失败"));
-	return;
+	HANDLE thrHandle;
+	thrHandle = (HANDLE)_beginthreadex(NULL, 0, GrapPhotoThread, this, 0, NULL);
+	CloseHandle(thrHandle);
 }
 
 unsigned int __stdcall CtestCameraLibDlg::WriteStripeThread(void* pVoid)
@@ -1624,4 +1488,247 @@ void CtestCameraLibDlg::OnBnClickedRadioSmall()
 		m_bUsedInBigPlane = true;
 	}
 	WriteParam();
+}
+
+unsigned int __stdcall CtestCameraLibDlg::GrapPhotoThread(void* pVoid)
+{
+	if (NULL == pVoid)
+		return 0;
+	CtestCameraLibDlg* pThis = (CtestCameraLibDlg*)pVoid;
+	pThis->m_bHold = true;
+	pThis->m_childDlg.SetFolderNamePtr(&pThis->m_targetSaveFolder);
+	pThis->m_childDlg.DoModal();
+	std::string mFolderName = MultiStringFromUnicodeString(pThis->m_targetSaveFolder);
+	CString tmpwFolderPath = pThis->m_programPath + _T("saveImages\\") + pThis->m_targetSaveFolder;
+	tmpwFolderPath += _T("\\");
+	if (FALSE == PathFileExists(tmpwFolderPath))
+		CreateDirectory(tmpwFolderPath, NULL);
+	else
+	{
+		pThis->MessageBox(_T("目标文件夹重名，请检查。"));
+		return 0;
+	}
+
+	std::string tmpFolderPath = MultiStringFromUnicodeString(pThis->m_programPath);
+	int tmpWidth = 0;
+	int tmpHeight = 0;
+	SN_IMG_FORMAT tmpFormat;
+	printf("lvc pThis->m_imgGroupIndex:%d", pThis->m_imgGroupIndex);
+	int tmpImgCount = pThis->m_imgGroups[pThis->m_imgGroupIndex]->imgNames.size();
+	int tmpStartIndex = pThis->m_imgGroups[pThis->m_imgGroupIndex]->startIndex;
+	int tmpCamCount = pThis->m_cameraList.size();
+	ScanImages scanLImages;
+	ScanImages scanRImages;
+	ScanImages scanLHImages;
+	scanLImages.imageCount = 0;
+	scanRImages.imageCount = 0;
+	scanLHImages.imageCount = 0;
+	int indexOffset = 0;
+	for (int i = 0; i < tmpImgCount; ++i)
+	{
+		pThis->m_hProjector->PorjectorDisplay(tmpStartIndex + i);
+		Sleep(pThis->m_waitTime);
+		for (int j = 0; j < tmpCamCount; ++j)
+		{
+			if (56 == tmpImgCount && i >= 28)
+				indexOffset = 2;
+			unsigned char* tmpPtr = NULL;
+			EnterCriticalSection(&pThis->m_snapLock);
+			sn3DCamera::SnapShot(pThis->m_cameraList[j], tmpPtr);
+			LeaveCriticalSection(&pThis->m_snapLock);
+			if (tmpPtr)
+			{
+				sn3DImageData<unsigned char>* tmpImg = NULL;
+				if (0 == j){
+					if (0 == indexOffset){
+						tmpImg = &(scanLImages.images[i]);
+						++scanLImages.imageCount;
+					}
+					else{
+						tmpImg = &(scanLHImages.images[i - 28]);
+						++scanLHImages.imageCount;
+					}
+				}
+				else{
+					++scanRImages.imageCount;
+					tmpImg = &(scanRImages.images[i]);
+				}
+
+				if (NULL == tmpImg)
+					continue;
+
+				sn3DCamera::GetResolution(pThis->m_cameraList[j], tmpWidth, tmpHeight);
+				sn3DCamera::GetColorMode(pThis->m_cameraList[j], tmpFormat);
+				tmpImg->create(tmpWidth, tmpHeight, SN_IMG_FORMAT::FORMAT_RGB888 == tmpFormat ? 3 : 1);
+
+				memcpy(tmpImg->m_data, tmpPtr, tmpWidth*tmpHeight*(SN_IMG_FORMAT::FORMAT_RGB888 == tmpFormat ? 3 : 1));
+				sprintf_s(tmpImg->m_name, 259, "%ssaveImages\\%s\\Sc_%d_%d.bmp", tmpFolderPath.c_str(), mFolderName.c_str(), j + indexOffset, (56 == tmpImgCount && i >= 28) ? i - 28 : i);
+				int tmpRet = sn3DImageLoad::sn3DWriteImage(tmpImg->m_name, *tmpImg);
+			}
+		}
+	}
+	bool bSucessFinish = true;
+	// 计算
+	printf("Grab End\n");
+	if (pThis->m_bEnableCheckAfterGrab){
+		char tmpChildFolderPath[300] = { 0 };
+		sprintf_s(tmpChildFolderPath, "%ssaveImages\\%s\\", tmpFolderPath.c_str(), mFolderName.c_str());
+		char tmpCalibInfoPath[300] = { 0 };
+		sprintf_s(tmpCalibInfoPath, "%s200x150", tmpFolderPath.c_str());
+		char tmpDestFileName[300] = { 0 };
+		sprintf_s(tmpDestFileName, "%s%s.dml", tmpChildFolderPath, mFolderName.c_str());
+		if (85 == pThis->m_imgGroups[pThis->m_imgGroupIndex]->imgNames.size()){ // 标定板重建
+			printf("Calib-board Rebuild\n");
+			// 计算 2D (固定值)
+			std::vector<float> widthSamples;
+			for (int i = 0; i < 17; ++i)
+				widthSamples.push_back(1600 - i * 80);
+			std::vector<float> heightSamples;
+			for (int i = 0; i < 14; ++i)
+				heightSamples.push_back(1060 - i * 80);
+			std::vector<Vector2> offsets;
+			offsets.emplace_back(0, 0);
+			vector<float> tw = { -320.f, -306.667f, -293.333f, -280.f, -266.667f, -253.333f, 253.333f, 266.667f, 280.f, 293.333f, 306.667f, 320.f };
+			vector<float> th = { 40.f, 26.667f, 13.333f, 0.f, -13.333f, -26.667f, -40.f };
+			for (int i = 0; i < th.size(); ++i)
+			{
+				for (int j = 0; j < tw.size(); ++j)
+					offsets.emplace_back(tw[j], th[i]);
+			}
+			vector<Vector3> p3Ds;
+			bool bRet = pThis->stereobuild_with_Ref(scanLImages, scanRImages, tmpCalibInfoPath, p3Ds);
+			if (bRet){
+				DLPMapLookupTable table;
+				Sn3DAlgorithm::RetVal val = DLP_compute_map_use_calibration_board(widthSamples, heightSamples, offsets, p3Ds, Vector2i(1920, 1080), pThis->m_bUsedInBigPlane ? Vector2(144, 81) : Vector2(96, 54), table, pThis->m_smoothRatio);
+				cout << val << endl;
+				cout << table.gridNum.transpose() << endl;
+				cout << table.gridSize.transpose() << endl;
+				cout << table.table[0].cols() << " " << table.table[0].rows() << endl;
+				cout << table.table[1].cols() << " " << table.table[1].rows() << endl;
+				if (0 != val){
+					printf("DLP_compute_map_use_calibration_board ReturnError: %d\n", val);
+					bSucessFinish = false;
+				}
+				else
+					write_DLPMapLookupTable(tmpDestFileName, table);
+			}
+			else
+				printf("Rebuild Failed\n");
+		}
+		else{ // 条纹重建
+
+			printf("Stripe Rebuild\n");
+			std::vector<Vector3> p3D;
+			std::vector<Vector2> p2D;
+			bool bRet = pThis->StereobuildDLP(scanLImages, scanRImages, scanLHImages, tmpCalibInfoPath, p3D, p2D);
+			if (bRet){
+				DLPMapLookupTable table;
+				Sn3DAlgorithm::RetVal val = DLP_compute_map_relation(p3D, p2D, Vector2i(1920, 1080), pThis->m_bUsedInBigPlane ? Vector2(144, 81) : Vector2(96, 54), table, pThis->m_smoothRatio);
+				if (0 != val){
+					bSucessFinish = false;
+				}
+				else
+					write_DLPMapLookupTable(tmpDestFileName, table);
+			}
+			else
+				printf("Rebuild Failed\n");
+		}
+	}
+
+	for (int i = 0; i < scanLImages.imageCount; ++i){
+		if (scanLImages.images[i].m_data){
+			delete[](scanLImages.images[i].m_data);
+			scanLImages.images[i].m_data = NULL;
+		}
+	}
+	for (int i = 0; i < scanRImages.imageCount; ++i){
+		if (scanRImages.images[i].m_data){
+			delete[](scanRImages.images[i].m_data);
+			scanRImages.images[i].m_data = NULL;
+		}
+	}
+	for (int i = 0; i < scanLHImages.imageCount; ++i){
+		if (scanLHImages.images[i].m_data){
+			delete[](scanLHImages.images[i].m_data);
+			scanLHImages.images[i].m_data = NULL;
+		}
+	}
+	pThis->m_bHold = false;
+
+	return 0;
+}
+
+unsigned int __stdcall CtestCameraLibDlg::TestGrapPhotoThread(void* pVoid)
+{
+	if (NULL == pVoid)
+		return 0;
+
+	CtestCameraLibDlg* pThis = (CtestCameraLibDlg*)pVoid;
+	int tmpImgCount = 28;
+	ScanImages scanLImages;
+	ScanImages scanRImages;
+	ScanImages scanLHImages;
+	scanLImages.imageCount = tmpImgCount;
+	scanRImages.imageCount = tmpImgCount;
+	scanLHImages.imageCount = tmpImgCount;
+	int indexOffset = 0;
+	for (int i = 0; i < tmpImgCount; ++i)
+	{
+		char lPath[200] = { 0 };
+		char rPath[200] = { 0 };
+		char lhPath[200] = { 0 };
+		sprintf_s(lPath, 200, "H:\\GrapImage\\testCameraLib-ForDLPSnap\\x64\\Release\\saveImages\\ScanImages\\2GS\\Sc_0_%d.bmp", i);
+		sprintf_s(rPath, 200, "H:\\GrapImage\\testCameraLib-ForDLPSnap\\x64\\Release\\saveImages\\ScanImages\\2GS\\Sc_1_%d.bmp", i);
+		sprintf_s(lhPath, 200, "H:\\GrapImage\\testCameraLib-ForDLPSnap\\x64\\Release\\saveImages\\ScanImages\\2GS\\Sc_2_%d.bmp", i);
+		int ret = sn3DImageLoad::sn3DReadImage(lPath, scanLImages.images[i]);
+		ret = sn3DImageLoad::sn3DReadImage(rPath, scanRImages.images[i]);
+		ret = sn3DImageLoad::sn3DReadImage(lhPath, scanLHImages.images[i]);
+	}
+	// 计算
+	char tmpChildFolderPath[300] = { 0 };
+	sprintf_s(tmpChildFolderPath, "H:\\GrapImage\\testCameraLib-ForDLPSnap\\x64\\Release\\saveImages\\ScanImages\\kk");
+	char tmpCalibInfoPath[300] = { 0 };
+	sprintf_s(tmpCalibInfoPath, "H:\\GrapImage\\testCameraLib-ForDLPSnap\\x64\\Release\\200x150");
+	char tmpDestFileName[300] = { 0 };
+	sprintf_s(tmpDestFileName, "H:\\GrapImage\\testCameraLib-ForDLPSnap\\x64\\Release\\saveImages\\ScanImages\\kk\\kk.dml");
+
+
+	printf("Stripe Rebuild\n");
+	std::vector<Vector3> p3D;
+	std::vector<Vector2> p2D;
+	bool bRet = pThis->StereobuildDLP(scanLImages, scanRImages, scanLHImages, tmpCalibInfoPath, p3D, p2D);
+
+	if (bRet){
+		DLPMapLookupTable table;
+		Sn3DAlgorithm::RetVal val = DLP_compute_map_relation(p3D, p2D, Vector2i(1920, 1080), pThis->m_bUsedInBigPlane ? Vector2(144, 81) : Vector2(96, 54), table, pThis->m_smoothRatio);
+		cout << val << endl;
+		cout << table.gridNum.transpose() << endl;
+		cout << table.gridSize.transpose() << endl;
+		cout << table.table[0].cols() << " " << table.table[0].rows() << endl;
+		cout << table.table[1].cols() << " " << table.table[1].rows() << endl;
+		if (0 == val)
+			write_DLPMapLookupTable(tmpDestFileName, table);
+		else
+			bRet = false;
+	}
+	else
+		printf("Rebuild Failed\n");
+
+	for (int i = 0; i < scanLImages.imageCount; ++i){
+		if (scanLImages.images[i].m_data){
+			delete[](scanLImages.images[i].m_data);
+			scanLImages.images[i].m_data = NULL;
+		}
+	}
+	for (int i = 0; i < scanRImages.imageCount; ++i){
+		if (scanRImages.images[i].m_data){
+			delete[](scanRImages.images[i].m_data);
+			scanRImages.images[i].m_data = NULL;
+		}
+	}
+	if (bRet)
+		pThis->MessageBox(_T("完成采集图片"));
+	else
+		pThis->MessageBox(_T("失败"));
+	return 0;
 }

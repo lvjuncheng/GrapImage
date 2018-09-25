@@ -63,6 +63,8 @@ public:
 private:
 	static unsigned int __stdcall WriteStripeThread(void* pVoid);
 	static unsigned int __stdcall SnapThread(void* pVoid);
+	static unsigned int __stdcall GrapPhotoThread(void* pVoid);
+	static unsigned int __stdcall TestGrapPhotoThread(void* pVoid);
 	bool ReadParam();
 	bool WriteParam();
 	bool StereobuildDLP(ScanImages& scanImagesLeft, ScanImages& scanImagesRight, ScanImages& scanImageCross, std::string cameraPath, vector<Eigen::Vector3>& p3D, vector<Eigen::Vector2>& p2D);
