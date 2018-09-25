@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<MV_API>
+    <LogEnable>0</LogEnable>
+    <TraceEnable>0</TraceEnable>
+    <ConfigEnable>0</ConfigEnable>
+</MV_API>

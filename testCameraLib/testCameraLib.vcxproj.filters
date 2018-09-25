@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="projector">
+      <UniqueIdentifier>{0e9315a4-69aa-4c6a-a8bc-8c82d15b4e40}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+    <None Include="res\testCameraLib.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\testCameraLib.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="testCameraLib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="testCameraLibDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DisplayWnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="glew.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="glut.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageConvert.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sn3DProjector\Projector\BaseWindow.h">
+      <Filter>projector</Filter>
+    </ClInclude>
+    <ClInclude Include="sn3DProjector\Projector\MonitorDC.h">
+      <Filter>projector</Filter>
+    </ClInclude>
+    <ClInclude Include="sn3DProjector\Projector\Monitors.h">
+      <Filter>projector</Filter>
+    </ClInclude>
+    <ClInclude Include="sn3DProjector\Projector\MultiMonitor.h">
+      <Filter>projector</Filter>
+    </ClInclude>
+    <ClInclude Include="sn3DProjector\Projector\Projector.h">
+      <Filter>projector</Filter>
+    </ClInclude>
+    <ClInclude Include="sn3DProjector\Projector\ProjectWnd.h">
+      <Filter>projector</Filter>
+    </ClInclude>
+    <ClInclude Include="sn3DProjector\Projector\RasterImages.h">
+      <Filter>projector</Filter>
+    </ClInclude>
+    <ClInclude Include="FolderDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="testCameraLib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="testCameraLibDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DisplayWnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageConvert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sn3DProjector\Projector\BaseWindow.cpp">
+      <Filter>projector</Filter>
+    </ClCompile>
+    <ClCompile Include="sn3DProjector\Projector\MonitorDC.cpp">
+      <Filter>projector</Filter>
+    </ClCompile>
+    <ClCompile Include="sn3DProjector\Projector\Monitors.cpp">
+      <Filter>projector</Filter>
+    </ClCompile>
+    <ClCompile Include="sn3DProjector\Projector\Multimon.cpp">
+      <Filter>projector</Filter>
+    </ClCompile>
+    <ClCompile Include="sn3DProjector\Projector\MultiMonitor.cpp">
+      <Filter>projector</Filter>
+    </ClCompile>
+    <ClCompile Include="sn3DProjector\Projector\Projector.cpp">
+      <Filter>projector</Filter>
+    </ClCompile>
+    <ClCompile Include="sn3DProjector\Projector\ProjectWnd.cpp">
+      <Filter>projector</Filter>
+    </ClCompile>
+    <ClCompile Include="sn3DProjector\Projector\RasterImages.cpp">
+      <Filter>projector</Filter>
+    </ClCompile>
+    <ClCompile Include="FolderDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="testCameraLib.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
